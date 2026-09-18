@@ -1,0 +1,34 @@
+name: Pipeline DevSecOps - Aula Pratica
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  auditoria_seguranca:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout do Código
+      uses: actions/checkout@v3
+
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Instalar Ferramentas de Segurança
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit pip-audit
+
+    - name: SAST - Auditoria de Código (Bandit)
+      run: |
+        echo "Buscando senhas expostas e injeções de SQL..."
+        bandit -r . -f custom
+
+    - name: SCA - Auditoria de Dependências (pip-audit)
+      run: |
+        echo "Verificando CVEs no requirements.txt..."
+        pip-audit -r requirements.txt
